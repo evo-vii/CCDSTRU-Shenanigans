@@ -1,0 +1,22 @@
+Interpretation of MP Specs
+
+Sample from Seb:
+
+Played on 3x3 grid (Set M, C defines the sides). 
+
+Objective is to capture as much territory as possible.
+
+2 Players with territory R and B, respectively. 
+
+Free territory is in set F.
+
+Game ends when 3 blocks exactly are free, more than 20 moves have been done 
+(defined by val), or either player loses all their territory.
+
+go is a turn indicator. True means player 1/R is moving, false means player 2/B is playing.
+
+First move marks exactly one spot in the grid, then subsequent moves create a t-shaped area 
+with rules I haven't figured out yet.
+
+Some corrections:
+When I meant first move, I meant first move for each, so both players pick 1 tile to start with.
