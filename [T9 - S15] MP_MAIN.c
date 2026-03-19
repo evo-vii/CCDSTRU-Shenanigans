@@ -16,6 +16,14 @@
 
 // DEFINITIONS-------------------------------------------------------------------------------------------------------------------------------
 
+typedef struct game
+{
+  int R[8], B[8], S[8], T[8], V[8];
+  short good, go , start, over, found;
+  int val;
+} gameState;
+
+
 // FUNCTIONS---------------------------------------------------------------------------------------------------------------------------------
 
 //    (DEVNOTE - Lance: All functions are defaulted to void, please assume they are not yet fully interpreted - 03/04/26)
