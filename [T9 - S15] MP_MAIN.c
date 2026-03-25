@@ -5,8 +5,7 @@
                       Sanico, Lance Matthew G.
  *                    Toledo, Nyle M.
  *  Section         : S15
- *  Last Modified   : 03/04/2026 @ 11:15am
- *  Acknowledgments : <list of references used in the making of this project>
+ *  Last Modified   : 03/25/2026 @ 11:15am
  ******************************************************************************/
 
 // PRE-PROCESSOR DIRECTIVES------------------------------------------------------------------------------------------------------------------
@@ -16,6 +15,7 @@
 
 // DEFINITIONS-------------------------------------------------------------------------------------------------------------------------------
 
+// sys_variables
 typedef struct game
 {
   int R[8], B[8], S[8], T[8], V[8];
@@ -71,10 +71,16 @@ void Update()
 /*
   <function description + params>
 */
-void NextPlayerMove()
+void NextPlayerMove(int pos)
 {
 
+  // (¬over ∧ start ∧ go) → (R = R ∪ {pos} ∧ S = S ∪ {pos} ∧ good = true)
+  // (¬over ∧ start ∧ ¬go) → (B = B ∪ {pos} ∧ S = S ∪ {pos} ∧ good = true)
+  // (¬over ∧ ¬start ∧ (go ∧ pos ∈ R ∨ ¬go ∧ pos ∈ B)) → (Update(pos) ∧ good = true)
+  // (start ∧ |R| = 1 ∧ |B| = 1) → start = false
+  // (¬over ∧ good) → (good = ¬good ∧ go = ¬go ∧ val = val + 1)
 
+  
 
 }
 
@@ -83,6 +89,11 @@ void NextPlayerMove()
 */
 void GameOver()
 {
+
+  // result ∈ {“R wins”, “B wins”, “draw”}
+  // (over ∧ |R| > |B|) → result = “R wins”
+  // (over ∧ |R| < |B|) → result = “B wins”
+  // (over ∧ |R| = |B|) → result = “draw”
 
 
 
@@ -93,6 +104,12 @@ void GameOver()
 
 int main()
 {
+
+  printf("\n\n[ Welcome to the Game! ]\n\n");
+
+  // Begin actual code executions below.
+
+
 
 
   return 0;
