@@ -10,6 +10,9 @@
 
 // PRE-PROCESSOR DIRECTIVES------------------------------------------------------------------------------------------------------------------
 #include <stdio.h>
+#define ROWS 3
+#define COLUMNS 3
+#define TOTALCELLS 9
 
 
 
@@ -22,6 +25,51 @@ typedef struct game
   short good, go , start, over, found;
   int val;
 } gameState;
+
+
+//Helper functions
+
+//deletes a number from the set.
+void delete(int* arr, int target)
+{
+    short jump = 0;
+    for(int i=0; i < TOTALCELLS; i++)
+    {
+        if(arr[i] == target)
+        {
+            jump++;
+        }
+        else if(jump)
+        {
+            arr[i-jump] = arr[i];
+        }
+    }
+}
+
+//adds an element to the set at the end (empty cells are marked with negative numbers)
+void insert(int* arr, int target)
+{
+    for(int i=0; i<TOTALCELLS; i++)
+    {
+        if(arr[i] < 0)
+        {
+            arr[i] = target;
+        }
+    }
+}
+
+//Turns a number into an (x, y) coordinate (FROM THE TOP LEFT, THINK 2D ARRAYS)
+void toCoordinates(int single, int* x, int* y)
+{
+    *y = single % ROWS;
+    *x = single / ROWS;
+}
+
+//Turns an (x, y) pair into a single number
+int toSingle(int x, int y)
+{
+    return(x*ROWS+y);
+}
 
 
 // FUNCTIONS---------------------------------------------------------------------------------------------------------------------------------
