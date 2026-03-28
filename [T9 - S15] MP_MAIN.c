@@ -14,6 +14,8 @@
 #define COLUMNS 3
 #define TOTALCELLS 9
 
+typedef short bool;
+
 
 
 // DEFINITIONS-------------------------------------------------------------------------------------------------------------------------------
@@ -21,8 +23,8 @@
 // sys_variables
 typedef struct game
 {
-  int R[8], B[8], S[8], T[8], V[8];
-  short good, go , start, over, found;
+  int R[9], B[9], S[9], T[9];
+  bool good, go, start, over, found;
   int val;
 } gameState;
 
@@ -61,14 +63,29 @@ void insert(int* arr, int target)
 //Turns a number into an (x, y) coordinate (FROM THE TOP LEFT, THINK 2D ARRAYS)
 void toCoordinates(int single, int* x, int* y)
 {
-    *y = single % ROWS;
-    *x = single / ROWS;
+    *y = (single % ROWS) + 1;
+    *x = (single / ROWS) + 1;
 }
 
 //Turns an (x, y) pair into a single number
 int toSingle(int x, int y)
 {
-    return(x*ROWS+y);
+    return((x-1)*ROWS+(y-1));
+}
+
+//Checks if an element is in the set.
+int inSet(int single, int size, int arr[])
+{
+    int found = 0;
+    for(int i=0; i<size; i++)
+    {
+        if(arr[i] = single)
+        {
+            found = 1;
+        }
+    }
+
+    return found;
 }
 
 
@@ -99,21 +116,81 @@ void Replace()
 /*
   <function description + params>
 */
-void Expand()
+void Expand(int single, gameState game)
 {
+    int a, b;
+    int u, k, d, r;
 
+    toCoordinates(single, &a, &b);
 
+    //Bounds checks
+    if(a-1 > 0)
+    {
+        u = toSingle(a-1, b);
+    }
+    else
+    {
+        u = -1;
+    }
 
+    if(a+1 < ROWS+1)
+    {
+        d = toSingle(a-1, b);
+    }
+    else
+    {
+        d = -1;
+    }
+
+    if(b-1 > 0)
+    {
+        k = toSingle(a, b-1);
+    }
+    else
+    {
+        k = -1;
+    }
+
+    if(b+1 < COLUMNS+1)
+    {
+        r = toSingle(a, b+1);
+    }
+    else
+    {
+        u = -1;
+    }
+
+    Remove(single);
+
+    if(game.go)
+    {
+        Replace(u);
+    }
+    else
+    {
+        Replace(d);
+    }
+    Replace(k);
+    Replace(r);
 }
 
 /*
   <function description + params>
 */
-void Update()
+void Update(int single, gameState game)
 {
+    game.good = 0;
+    if(!inSet(single, TOTALCELLS, game.S))
+    {
+        game.good = !game.good;
+        insert(game.S, single);
+    }
 
-
-
+    if(!game.good && inSet(single, TOTALCELLS, game.S) && !inSet(single, TOTALCELLS, game.T))
+    {
+        insert(game.T, single);
+        Expand(game.T, game);
+    }
 }
 
 /*
@@ -154,6 +231,9 @@ int main()
 {
 
   printf("\n\n[ Welcome to the Game! ]\n\n");
+  gameState game = {.R = {-1}, .S = {-1}, .B = {-1}, .T = {-1}};
+  game.good, game.found, game.val = 0;
+  game.go, game.start = 1;
 
   // Begin actual code executions below.
 
