@@ -5,7 +5,7 @@
                       Sanico, Lance Matthew G.
  *                    Toledo, Nyle M.
  *  Section         : S15
- *  Last Modified   : 03/25/2026 @ 11:15am
+ *  Last Modified   : 03/29/2026
  ******************************************************************************/
 
 // PRE-PROCESSOR DIRECTIVES------------------------------------------------------------------------------------------------------------------
@@ -46,7 +46,12 @@ void GameOver(gameState* game);
 
 //Helper functions
 
-//deletes a number from the set.
+/** 
+  The function delete() deletes a number from the set.
+
+  @param arr - Array elements to be counted.
+  @param target - The value to be checked against an array element.
+*/
 void delete(int* arr, int target)
 {
     short jump = 0;
@@ -64,7 +69,14 @@ void delete(int* arr, int target)
     }
 }
 
-//adds an element to the set at the end (empty cells are marked with negative numbers)
+/** 
+  The function insert() adds an element to the set
+  at the end, with empty cells marked with negative
+  numbers.
+
+  @param arr - Array elements to be counted.
+  @param target - The value to be checked against an array element.
+*/
 void insert(int* arr, int target)
 {
     bool placed = 0;
@@ -78,6 +90,13 @@ void insert(int* arr, int target)
     }
 }
 
+/** 
+  The function printarray() prints the array elements
+  via loops.
+
+  @param arr - Array elements to be counted.
+  @param size - Array Size
+*/
 void printarray(int* arr, int size)
 {
     for(int i=0; i<TOTALCELLS; i++)
@@ -87,20 +106,41 @@ void printarray(int* arr, int size)
     printf("\n");
 }
 
-//Turns a number into an (x, y) coordinate (FROM THE TOP LEFT, THINK 2D ARRAYS)
+/** 
+  The function toCoordinates() transforms a number into
+  two coordinate values.
+
+  @param single - A position in the grid
+  @param x - The Abscissa/X-Coordinate
+  @param y - The Ordinate/Y-Coordinate
+*/
 void toCoordinates(int single, int* x, int* y)
 {
     *y = (single % ROWS) + 1;
     *x = (single / ROWS) + 1;
 }
 
-//Turns an (x, y) pair into a single number
+/** 
+  The function toSingle() transforms two coordinate values
+  into a single integer.
+
+  @param x - The Abscissa/X-Coordinate
+  @param y - The Ordinate/Y-Coordinate
+*/
 int toSingle(int x, int y)
 {
     return((x-1)*ROWS+(y-1));
 }
 
-//Checks if an element is in the set.
+/** 
+  The function inSet() checks a certain array element
+  if it is present in the set. Specifically, it checks
+  the presences of the grid's position in a set.
+
+  @param arr - Array elements to be counted.
+  @param size - Array Size
+  @param single - A position in the grid
+*/
 int inSet(int single, int size, int arr[])
 {
     int found = 0;
@@ -116,7 +156,13 @@ int inSet(int single, int size, int arr[])
     return found;
 }
 
-//Returns cardinality by counting nonnegative elements.
+/** 
+  The function cardinality() returns cardinality by counting
+  non-negative elements.
+
+  @param arr - Array elements to be counted.
+  @param n - Array Size
+*/
 int cardinality(int arr[], int n)
 {
     int count = 0;
@@ -131,6 +177,12 @@ int cardinality(int arr[], int n)
     return count;
 }
 
+/** 
+  The function DisplayGrid() presents the game grid's current
+  state.
+
+  @param game - The central structure covering the game's variables.
+*/
 void displayGrid(gameState* game)
 {
 
@@ -168,12 +220,16 @@ void displayGrid(gameState* game)
     printf("======================\n");
     printf("|  %c  |  %c  |  %c  |\n", cOccupant[0][2], cOccupant[1][2], cOccupant[2][2]);
     printf("======================\n");
-    printf("LEGEND: 'R' - P1, 'B' - P2, '-' - EMPTY, 'S' - EXPANSION, 'T' - EXPANDED\n");
+    printf("\nLEGEND: 'R' - P1, 'B' - P2, '-' - EMPTY, 'S' - EXPANSION, 'T' - EXPANDED\n\n");
 }
 // MAIN FUNCTIONS---------------------------------------------------------------------------------------------------------------------------------
 
-/*
-  <function description + params>
+/** 
+  The function Remove() removes an instance of the player in the
+  grid.
+
+  @param single - The intended position/coordinate of a player.
+  @param game - The central structure covering the game's variables.
 */
 void Remove(int single, gameState* game)
 {
@@ -191,8 +247,11 @@ void Remove(int single, gameState* game)
 
 }
 
-/*
-  <function description + params>
+/** 
+  The function Replace() replaces territory within the grid.
+
+  @param single - The intended position/coordinate of a player.
+  @param game - The central structure covering the game's variables.
 */
 void Replace(int single, gameState* game)
 {
@@ -237,23 +296,15 @@ void Replace(int single, gameState* game)
     }
 }
 
-/*
-  <function description + params>
+/** 
+  The function Expand() sets up the territory for expansion for the
+  players.
+
+  @param single - The intended position/coordinate of a player.
+  @param game - The central structure covering the game's variables.
 */
 void Expand(int single, gameState* game)
 {
-    
-    // (a, b) = pos
-    // u, d, k, r ∈ M
-    // u = (a − 1, b)
-    // d = (a + 1, b)
-    // k = (a, b − 1)
-    // r = (a, b + 1)
-    // Remove(pos)
-    // (go) → Replace(u)
-    // (¬go) → Replace(d)
-    // Replace(k)
-    // Replace(r)
     
     int a, b;
     int u, k, d, r;
@@ -324,14 +375,15 @@ void Expand(int single, gameState* game)
     }
 }
 
-/*
-  <function description + params>
+/** 
+  The function Update() sets game status to 0 and checks for the positions
+  for S and T.
+
+  @param single - The intended position/coordinate of a player.
+  @param game - The central structure covering the game's variables.
 */
 void Update(int single, gameState* game)
 {
-    // good = false
-    // (pos̸∈ S) → (S = S ∪ {pos} ∧ good = ¬good)
-    // (¬good ∧ pos ∈ S ∧ pos̸∈ T ) → (T = T ∪ {pos} ∧ Expand(pos))
     
     game->good = 0;
     if(!inSet(single, TOTALCELLS, game->S))
@@ -347,17 +399,15 @@ void Update(int single, gameState* game)
     }
 }
 
-/*
-  <function description + params>
+/** 
+  The function NextPlayerMove() is an iterative function looping for every
+  instance each player is given a chance to move.
+
+  @param single - The intended position/coordinate of a player.
+  @param game - The central structure covering the game's variables.
 */
 void NextPlayerMove(int single, gameState* game)
 {
-
-  // (¬over ∧ start ∧ go) → (R = R ∪ {pos} ∧ S = S ∪ {pos} ∧ good = true)
-  // (¬over ∧ start ∧ ¬go) → (B = B ∪ {pos} ∧ S = S ∪ {pos} ∧ good = true)
-  // (¬over ∧ ¬start ∧ (go ∧ pos ∈ R ∨ ¬go ∧ pos ∈ B)) → (Update(pos) ∧ good = true)
-  // (start ∧ |R| = 1 ∧ |B| = 1) → start = false
-  // (¬over ∧ good) → (good = ¬good ∧ go = ¬go ∧ val = val + 1)
 
   if (!game->over && game->start && game->go)
   {
@@ -395,16 +445,13 @@ void NextPlayerMove(int single, gameState* game)
   game->over = (F == 3 || game->val > 20 || (!game->start && ((R && !B) || (!R && B))));
 }
 
-/*
-  <function description + params>
+/** 
+  The function GameOver() sets the conditions for the game to end.
+
+  @param game - The central structure covering the game's variables.
 */
 void GameOver(gameState* game)
 {
-
-  // result ∈ {“R wins”, “B wins”, “draw”}
-  // (over ∧ |R| > |B|) → result = “R wins”
-  // (over ∧ |R| < |B|) → result = “B wins”
-  // (over ∧ |R| = |B|) → result = “draw”
 
     if (game->over == 1 && cardinality(game->R, TOTALCELLS) > cardinality(game->B, TOTALCELLS))
         printf("\nR wins!\n");
@@ -420,7 +467,6 @@ void GameOver(gameState* game)
 int main()
 {
 
-  int nChoice;
   int x, y;
 
   gameState game = {.R = {-1, -1, -1, -1, -1, -1, -1, -1, -1}, 
@@ -438,16 +484,39 @@ int main()
 
     do
     {
+        // Displays grid for every instance of a player's turn.
         displayGrid(&game);
-        printf("Your turn, player %d! Type a pair of coordinates (eg., 1 1, starts from top left at 1 1)", 2 - game.go);
-        scanf("%d %d%*c", &x, &y);
+        
+        do
+        {
+            printf("Your turn, player %d! Type a an X coordinate (eg., 1 1, starts from top left at 1 1):", 2 - game.go);
+            scanf("%d", &x); // scanf("%d %d%*c", &x, &y);
+
+            if (x > 3 || x < 1)
+                printf("\nOut of Bounds! Your range is from (1, 1) to (3, 3) only!\n");
+
+        } while (x > 3 || x < 1); // Guards options to prevent potentially buggy inputs.
+
+        do
+        {
+            printf("Your turn, player %d! Type a Y coordinate (eg., 1 1, starts from top left at 1 1):", 2 - game.go);
+            scanf("%d", &y);
+
+            if (x > 3 || x < 1)
+                printf("\nOut of Bounds! Your range is from (1, 1) to (3, 3) only!\n");
+
+        } while (x > 3 || x < 1);
+
         NextPlayerMove(toSingle(x, y), &game);
-        if (game.over == 1)
+
+        if (game.over == 1) // Game over condition
             GameOver(&game);
 
     } while (game.over != 1);
 
+    // Final State
 
+    displayGrid(&game);
 
   return 0;
 }
