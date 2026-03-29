@@ -35,9 +35,15 @@ typedef struct game
 void displayGrid()
 {
 
+    char cOccupant[ROWS][COLUMNS];
 
-
-
+    printf("======================\n");
+    printf("|  %c  |  %c  |  %c  |\n", cOccupant[0][0], cOccupant[1][0], cOccupant[2][0]);
+    printf("======================\n");
+    printf("|  %c  |  %c  |  %c  |\n", cOccupant[0][1], cOccupant[1][1], cOccupant[2][1]);
+    printf("======================\n");
+    printf("|  %c  |  %c  |  %c  |\n", cOccupant[0][2], cOccupant[1][2], cOccupant[2][2]);
+    printf("======================\n");
 
 }
 
@@ -261,7 +267,7 @@ void NextPlayerMove(int single, gameState game)
     game.go == !game.go;
     game.val++;
   }
-  
+
 }
 
 /*
@@ -290,6 +296,8 @@ void GameOver(gameState game)
 int main()
 {
 
+  int nChoice;
+
   gameState game = {.R = {-1}, .S = {-1}, .B = {-1}, .T = {-1}};
   game.good, game.found, game.val = 0;
   game.go, game.start = 1;
@@ -299,6 +307,8 @@ int main()
     // Begin the game flow
 
     printf("\n\n[ Welcome to the Game! ]\n\n");
+
+    
 
     do
     {
