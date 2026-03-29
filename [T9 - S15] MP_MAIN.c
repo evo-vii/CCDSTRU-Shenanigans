@@ -10,6 +10,7 @@
 
 // PRE-PROCESSOR DIRECTIVES------------------------------------------------------------------------------------------------------------------
 #include <stdio.h>
+
 #define ROWS 3
 #define COLUMNS 3
 #define TOTALCELLS 9
@@ -30,6 +31,15 @@ typedef struct game
 
 
 //Helper functions
+
+void displayGrid()
+{
+
+
+
+
+
+}
 
 //deletes a number from the set.
 void delete(int* arr, int target)
@@ -89,7 +99,7 @@ int inSet(int single, int size, int arr[])
 }
 
 
-// FUNCTIONS---------------------------------------------------------------------------------------------------------------------------------
+// MAIN FUNCTIONS---------------------------------------------------------------------------------------------------------------------------------
 
 //    (DEVNOTE - Lance: All functions are defaulted to void, please assume they are not yet fully interpreted - 03/04/26)
 
@@ -118,6 +128,19 @@ void Replace()
 */
 void Expand(int single, gameState game)
 {
+    
+    // (a, b) = pos
+    // u, d, k, r ∈ M
+    // u = (a − 1, b)
+    // d = (a + 1, b)
+    // k = (a, b − 1)
+    // r = (a, b + 1)
+    // Remove(pos)
+    // (go) → Replace(u)
+    // (¬go) → Replace(d)
+    // Replace(k)
+    // Replace(r)
+    
     int a, b;
     int u, k, d, r;
 
@@ -179,6 +202,10 @@ void Expand(int single, gameState game)
 */
 void Update(int single, gameState game)
 {
+    // good = false
+    // (pos̸∈ S) → (S = S ∪ {pos} ∧ good = ¬good)
+    // (¬good ∧ pos ∈ S ∧ pos̸∈ T ) → (T = T ∪ {pos} ∧ Expand(pos))
+    
     game.good = 0;
     if(!inSet(single, TOTALCELLS, game.S))
     {
@@ -196,7 +223,7 @@ void Update(int single, gameState game)
 /*
   <function description + params>
 */
-void NextPlayerMove(int pos)
+void NextPlayerMove(int single, gameState game)
 {
 
   // (¬over ∧ start ∧ go) → (R = R ∪ {pos} ∧ S = S ∪ {pos} ∧ good = true)
@@ -205,14 +232,42 @@ void NextPlayerMove(int pos)
   // (start ∧ |R| = 1 ∧ |B| = 1) → start = false
   // (¬over ∧ good) → (good = ¬good ∧ go = ¬go ∧ val = val + 1)
 
-  
+  if (!game.over && game.start == 1 && game.go == 1)
+  {
+    insert(game.R, single); 
+    insert(game.S, single);
 
+    game.good = 1;
+  }
+  else if (!game.over && game.start == 1 && game.go == 0)
+  {
+    insert(game.B, single); 
+    insert(game.S, single);
+
+    game.good = 1;
+  }
+  else if (!game.over && !game.start && ((game.go == 1 && inSet(single, TOTALCELLS, game.R)) || (!game.go && inSet(single, TOTALCELLS, game.B))))
+  {
+    Update(single, game);
+    game.good = 1;
+  }
+
+  if (game.start && R[] == 1 && B[] == 1)
+    game.start = 0;
+
+  if (!game.over && game.good == 0)
+  {
+    game.good = !game.good;
+    game.go == !game.go;
+    game.val++;
+  }
+  
 }
 
 /*
   <function description + params>
 */
-void GameOver()
+void GameOver(gameState game)
 {
 
   // result ∈ {“R wins”, “B wins”, “draw”}
@@ -220,7 +275,12 @@ void GameOver()
   // (over ∧ |R| < |B|) → result = “B wins”
   // (over ∧ |R| = |B|) → result = “draw”
 
-
+    if (game.over == 1 && game.R[] > game.B[])
+        printf("\nR wins!\n");
+    else if (game.over == 1 && game.R[] < game.B[])
+        printf("\nB wins!\n");
+    else if (game.over && game.R[] == game.B[])
+        printf("\ndraw\n");
 
 }
 
@@ -230,13 +290,25 @@ void GameOver()
 int main()
 {
 
-  printf("\n\n[ Welcome to the Game! ]\n\n");
   gameState game = {.R = {-1}, .S = {-1}, .B = {-1}, .T = {-1}};
   game.good, game.found, game.val = 0;
   game.go, game.start = 1;
 
   // Begin actual code executions below.
 
+    // Begin the game flow
+
+    printf("\n\n[ Welcome to the Game! ]\n\n");
+
+    do
+    {
+
+
+
+        if (game.over == 1)
+            GameOver(game);
+
+    } while (game.over != 1);
 
 
 
