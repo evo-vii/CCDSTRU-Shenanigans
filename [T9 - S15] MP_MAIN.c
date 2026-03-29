@@ -29,6 +29,7 @@ typedef struct game
 
 // FUNCTION PROTOTYPES------------------------------------------------------------------------------------------------------------------
 
+void delete(int* arr, int target);
 void insert(int* arr, int target);
 void printarray(int* arr, int size);
 void toCoordinates(int single, int* x, int* y);
@@ -116,8 +117,8 @@ void printarray(int* arr, int size)
 */
 void toCoordinates(int single, int* x, int* y)
 {
-    *y = (single % ROWS) + 1;
-    *x = (single / ROWS) + 1;
+    *x = (single % ROWS) + 1;
+    *y = (single / ROWS) + 1;
 }
 
 /** 
@@ -129,7 +130,7 @@ void toCoordinates(int single, int* x, int* y)
 */
 int toSingle(int x, int y)
 {
-    return((x-1)*ROWS+(y-1));
+    return((y-1)*ROWS+(x-1));
 }
 
 /** 
@@ -187,10 +188,11 @@ void displayGrid(gameState* game)
 {
 
     char cOccupant[ROWS][COLUMNS];
+    int single;
     for (int i = 0; i < ROWS; i++)
         for (int j = 0; j < COLUMNS; j++)
         {
-            int single = toSingle(i+1, j+1);
+            single = toSingle(i+1, j+1);
             if(inSet(single, TOTALCELLS, game->R))
             {
                 cOccupant[i][j] = 'R'; 
@@ -199,19 +201,13 @@ void displayGrid(gameState* game)
             {
                 cOccupant[i][j] = 'B';
             }
-            else if(inSet(single, TOTALCELLS, game->T))
-            {
-                cOccupant[i][j] = 'T';
-            }
-            else if(inSet(single, TOTALCELLS, game->S))
-            {
-                cOccupant[i][j] = 'S';
-            }
             else
             {
                 cOccupant[i][j] = '-';
             }
         }
+
+    printf("\nGAME GRID SHOWING STATUS OF PLAYERS R & B\n\n");
 
     printf("======================\n");
     printf("|  %c  |  %c  |  %c  |\n", cOccupant[0][0], cOccupant[1][0], cOccupant[2][0]);
@@ -221,6 +217,35 @@ void displayGrid(gameState* game)
     printf("|  %c  |  %c  |  %c  |\n", cOccupant[0][2], cOccupant[1][2], cOccupant[2][2]);
     printf("======================\n");
     printf("\nLEGEND: 'R' - P1, 'B' - P2, '-' - EMPTY, 'S' - EXPANSION, 'T' - EXPANDED\n\n");
+
+    for (int i = 0; i < ROWS; i++)
+        for (int j = 0; j < COLUMNS; j++)
+        {
+            single = toSingle(i+1, j+1);
+            if(inSet(single, TOTALCELLS, game->S))
+            {
+                cOccupant[i][j] = 'S';
+            }
+            else if(inSet(single, TOTALCELLS, game->T))
+            {
+                cOccupant[i][j] = 'T';
+            }
+            else
+            {
+                cOccupant[i][j] = '-';
+            }
+        }
+
+    printf("\nGAME GRID SHOWING STATUS OF S & T\n\n");
+
+    printf("======================\n");
+    printf("|  %c  |  %c  |  %c  |\n", cOccupant[0][0], cOccupant[1][0], cOccupant[2][0]);
+    printf("======================\n");
+    printf("|  %c  |  %c  |  %c  |\n", cOccupant[0][1], cOccupant[1][1], cOccupant[2][1]);
+    printf("======================\n");
+    printf("|  %c  |  %c  |  %c  |\n", cOccupant[0][2], cOccupant[1][2], cOccupant[2][2]);
+    printf("======================\n");
+    printf("\nLEGEND: '-' - EMPTY, 'S' - EXPANSION, 'T' - EXPANDED\n\n");
 }
 // MAIN FUNCTIONS---------------------------------------------------------------------------------------------------------------------------------
 
@@ -311,6 +336,8 @@ void Expand(int single, gameState* game)
 
     toCoordinates(single, &a, &b);
 
+    printf("\nExpanding: %d and %d from %d\n", a, b, single);
+
     //Bounds checks
     if(a-1 > 0)
     {
@@ -323,7 +350,7 @@ void Expand(int single, gameState* game)
 
     if(a+1 < ROWS+1)
     {
-        d = toSingle(a-1, b);
+        d = toSingle(a+1, b);
     }
     else
     {
@@ -354,6 +381,7 @@ void Expand(int single, gameState* game)
     {
         if(u != -1)
         {
+           printf("Expanding left: %d and %d from %d\n", a, b, single);
            Replace(u, game); 
         }
     }
@@ -361,16 +389,19 @@ void Expand(int single, gameState* game)
     {
         if(d != -1)
         {
+           printf("Expanding right: %d and %d from %d\n", a, b, single);
            Replace(d, game); 
         }
     }
 
     if(k != -1)
     {
+        printf("Expanding high: %d and %d from %d\n", a, b, single);
         Replace(k, game); 
     }
     if(r != -1)
     {
+        printf("Expanding low: %d and %d from %d\n", a, b, single);
         Replace(r, game); 
     }
 }
@@ -392,7 +423,7 @@ void Update(int single, gameState* game)
         insert(game->S, single);
     }
 
-    if(!game->good && inSet(single, TOTALCELLS, game->S) && !inSet(single, TOTALCELLS, game->T))
+    else if(!game->good && inSet(single, TOTALCELLS, game->S) && !inSet(single, TOTALCELLS, game->T))
     {
         insert(game->T, single);
         Expand(single, game);
@@ -411,22 +442,32 @@ void NextPlayerMove(int single, gameState* game)
 
   if (!game->over && game->start && game->go)
   {
+    //(R = R ∪ {pos} ∧ S = S ∪ {pos}
     insert(game->R, single); 
     insert(game->S, single);
-
+    
+    // ∧ good = true
     game->good = 1;
   }
+  
+  // (¬over ∧ start ∧ ¬go) 
   else if (!game->over && game->start && !game->go)
   {
+    //(B = B ∪ {pos} ∧ S = S ∪ {pos}
     insert(game->B, single); 
     insert(game->S, single);
 
+    //S ∪ {pos}
     game->good = 1;
   }
   else if (!game->over && !game->start && ((game->go && inSet(single, TOTALCELLS, game->R)) || (!game->go && inSet(single, TOTALCELLS, game->B))))
   {
     Update(single, game);
     game->good = 1;
+  }
+  else
+  {
+    printf("That's not the right move...");
   }
 
   if (game->start && cardinality(game->R, TOTALCELLS) == 1 && cardinality(game->B, TOTALCELLS) == 1)
@@ -487,6 +528,8 @@ int main()
         // Displays grid for every instance of a player's turn.
         displayGrid(&game);
         
+        printf("MOVE #%d\n", game.val);
+
         do
         {
             printf("Your turn, player %d! Type a an X coordinate (eg., 1 1, starts from top left at 1 1):", 2 - game.go);
@@ -514,9 +557,6 @@ int main()
 
     } while (game.over != 1);
 
-    // Final State
-
-    displayGrid(&game);
 
   return 0;
 }
