@@ -17,8 +17,6 @@
 
 typedef short bool;
 
-
-
 // DEFINITIONS-------------------------------------------------------------------------------------------------------------------------------
 
 // sys_variables
@@ -29,6 +27,22 @@ typedef struct game
   int val;
 } gameState;
 
+// FUNCTION PROTOTYPES------------------------------------------------------------------------------------------------------------------
+
+void insert(int* arr, int target);
+void printarray(int* arr, int size);
+void toCoordinates(int single, int* x, int* y);
+int toSingle(int x, int y);
+int inSet(int single, int size, int arr[]);
+int cardinality(int arr[], int n);
+void displayGrid(gameState* game);
+
+void Remove(int single, gameState* game);
+void Replace(int single, gameState* game);
+void Expand(int single, gameState* game);
+void Update(int single, gameState* game);
+void NextPlayerMove(int single, gameState* game);
+void GameOver(gameState* game);
 
 //Helper functions
 
@@ -64,6 +78,15 @@ void insert(int* arr, int target)
     }
 }
 
+void printarray(int* arr, int size)
+{
+    for(int i=0; i<TOTALCELLS; i++)
+    {
+        printf("%d,", arr[i]);
+    }
+    printf("\n");
+}
+
 //Turns a number into an (x, y) coordinate (FROM THE TOP LEFT, THINK 2D ARRAYS)
 void toCoordinates(int single, int* x, int* y)
 {
@@ -83,7 +106,8 @@ int inSet(int single, int size, int arr[])
     int found = 0;
     for(int i=0; i<size; i++)
     {
-        if(arr[i] = single)
+        
+        if(arr[i] == single)
         {
             found = 1;
         }
@@ -107,21 +131,29 @@ int cardinality(int arr[], int n)
     return count;
 }
 
-void displayGrid(gameState game)
+void displayGrid(gameState* game)
 {
 
     char cOccupant[ROWS][COLUMNS];
-    for (int i = 1; i <= ROWS; i++)
-        for (int j = 1; j <= ROWS; j++)
+    for (int i = 0; i < ROWS; i++)
+        for (int j = 0; j < COLUMNS; j++)
         {
-            int single = toSingle(i, j);
-            if(inSet(single, TOTALCELLS, game.R))
+            int single = toSingle(i+1, j+1);
+            if(inSet(single, TOTALCELLS, game->R))
             {
                 cOccupant[i][j] = 'R'; 
             }
-            else if(inSet(single, TOTALCELLS, game.B))
+            else if(inSet(single, TOTALCELLS, game->B))
             {
                 cOccupant[i][j] = 'B';
+            }
+            else if(inSet(single, TOTALCELLS, game->T))
+            {
+                cOccupant[i][j] = 'T';
+            }
+            else if(inSet(single, TOTALCELLS, game->S))
+            {
+                cOccupant[i][j] = 'S';
             }
             else
             {
@@ -136,36 +168,79 @@ void displayGrid(gameState game)
     printf("======================\n");
     printf("|  %c  |  %c  |  %c  |\n", cOccupant[0][2], cOccupant[1][2], cOccupant[2][2]);
     printf("======================\n");
-
+    printf("LEGEND: 'R' - P1, 'B' - P2, '-' - EMPTY, 'S' - EXPANSION, 'T' - EXPANDED\n");
 }
 // MAIN FUNCTIONS---------------------------------------------------------------------------------------------------------------------------------
 
-//    (DEVNOTE - Lance: All functions are defaulted to void, please assume they are not yet fully interpreted - 03/04/26)
-
 /*
   <function description + params>
 */
-void Remove()
+void Remove(int single, gameState* game)
 {
+    if(game->go)
+    {
+        delete(game->R, single);
+    }
+    else
+    {
+        delete(game->B, single);
+    }
 
-
+    delete(game->S, single);
+    delete(game->T, single);
 
 }
 
 /*
   <function description + params>
 */
-void Replace()
+void Replace(int single, gameState* game)
 {
+    game->found = 0;
+    if(game->go && inSet(single, TOTALCELLS, game->B))
+    {
+        game->found = 1;
+        delete(game->B, single);
+    }
+    else if(game->go && inSet(single, TOTALCELLS, game->R))
+    {
+        game->found = 1;
+    }
+    else if(game->go && !inSet(single, TOTALCELLS, game->R))
+    {
+        insert(game->R, single);
+    }
 
+    if(!game->go && inSet(single, TOTALCELLS, game->R))
+    {
+        game->found = 1;
+        delete(game->R, single);
+    }
+    else if(!game->go && inSet(single, TOTALCELLS, game->B))
+    {
+        game->found = 1;
+    }
+    else if(!game->go && !inSet(single, TOTALCELLS, game->B))
+    {
+        insert(game->B, single);
+    }
 
-
+    if(game->found && !inSet(single, TOTALCELLS, game->S))
+    {
+        insert(game->S, single);
+        game->found = 0;
+    }
+    else if(game->found && inSet(single, TOTALCELLS, game->S) && !inSet(single, TOTALCELLS, game->T))
+    {
+        insert(game->T, single);
+        Expand(single, game);
+    }
 }
 
 /*
   <function description + params>
 */
-void Expand(int single, gameState game)
+void Expand(int single, gameState* game)
 {
     
     // (a, b) = pos
@@ -222,52 +297,52 @@ void Expand(int single, gameState game)
         u = -1;
     }
 
-    Remove(single);
+    Remove(single, game);
 
-    if(game.go)
+    if(game->go)
     {
         if(u != -1)
         {
-           Replace(u); 
+           Replace(u, game); 
         }
     }
     else
     {
         if(d != -1)
         {
-           Replace(d); 
+           Replace(d, game); 
         }
     }
 
     if(k != -1)
     {
-        Replace(k); 
+        Replace(k, game); 
     }
     if(r != -1)
     {
-        Replace(r); 
+        Replace(r, game); 
     }
 }
 
 /*
   <function description + params>
 */
-void Update(int single, gameState game)
+void Update(int single, gameState* game)
 {
     // good = false
     // (pos̸∈ S) → (S = S ∪ {pos} ∧ good = ¬good)
     // (¬good ∧ pos ∈ S ∧ pos̸∈ T ) → (T = T ∪ {pos} ∧ Expand(pos))
     
-    game.good = 0;
-    if(!inSet(single, TOTALCELLS, game.S))
+    game->good = 0;
+    if(!inSet(single, TOTALCELLS, game->S))
     {
-        game.good = !game.good;
-        insert(game.S, single);
+        game->good = !game->good;
+        insert(game->S, single);
     }
 
-    if(!game.good && inSet(single, TOTALCELLS, game.S) && !inSet(single, TOTALCELLS, game.T))
+    if(!game->good && inSet(single, TOTALCELLS, game->S) && !inSet(single, TOTALCELLS, game->T))
     {
-        insert(game.T, single);
+        insert(game->T, single);
         Expand(single, game);
     }
 }
@@ -275,7 +350,7 @@ void Update(int single, gameState game)
 /*
   <function description + params>
 */
-void NextPlayerMove(int single, gameState game)
+void NextPlayerMove(int single, gameState* game)
 {
 
   // (¬over ∧ start ∧ go) → (R = R ∪ {pos} ∧ S = S ∪ {pos} ∧ good = true)
@@ -284,42 +359,46 @@ void NextPlayerMove(int single, gameState game)
   // (start ∧ |R| = 1 ∧ |B| = 1) → start = false
   // (¬over ∧ good) → (good = ¬good ∧ go = ¬go ∧ val = val + 1)
 
-  if (!game.over && game.start == 1 && game.go == 1)
+  if (!game->over && game->start && game->go)
   {
-    insert(game.R, single); 
-    insert(game.S, single);
+    insert(game->R, single); 
+    insert(game->S, single);
 
-    game.good = 1;
+    game->good = 1;
   }
-  else if (!game.over && game.start == 1 && game.go == 0)
+  else if (!game->over && game->start && !game->go)
   {
-    insert(game.B, single); 
-    insert(game.S, single);
+    insert(game->B, single); 
+    insert(game->S, single);
 
-    game.good = 1;
+    game->good = 1;
   }
-  else if (!game.over && !game.start && ((game.go == 1 && inSet(single, TOTALCELLS, game.R)) || (!game.go && inSet(single, TOTALCELLS, game.B))))
+  else if (!game->over && !game->start && ((game->go && inSet(single, TOTALCELLS, game->R)) || (!game->go && inSet(single, TOTALCELLS, game->B))))
   {
     Update(single, game);
-    game.good = 1;
+    game->good = 1;
   }
 
-  if (game.start && cardinality(game.R, TOTALCELLS) == 1 && cardinality(game.B, TOTALCELLS) == 1)
-    game.start = 0;
+  if (game->start && cardinality(game->R, TOTALCELLS) == 1 && cardinality(game->B, TOTALCELLS) == 1)
+    game->start = 0;
 
-  if (!game.over && game.good == 0)
+  if (!game->over && game->good == 1)
   {
-    game.good = !game.good;
-    game.go == !game.go;
-    game.val++;
+    game->good = !game->good;
+    game->go = !game->go;
+    game->val++;
   }
 
+  int R = cardinality(game->R, TOTALCELLS);
+  int B = cardinality(game->B, TOTALCELLS);
+  int F = TOTALCELLS - R - B;
+  game->over = (F == 3 || game->val > 20 || (!game->start && ((R && !B) || (!R && B))));
 }
 
 /*
   <function description + params>
 */
-void GameOver(gameState game)
+void GameOver(gameState* game)
 {
 
   // result ∈ {“R wins”, “B wins”, “draw”}
@@ -327,11 +406,11 @@ void GameOver(gameState game)
   // (over ∧ |R| < |B|) → result = “B wins”
   // (over ∧ |R| = |B|) → result = “draw”
 
-    if (game.over == 1 && cardinality(game.R, TOTALCELLS) > cardinality(game.B, TOTALCELLS))
+    if (game->over == 1 && cardinality(game->R, TOTALCELLS) > cardinality(game->B, TOTALCELLS))
         printf("\nR wins!\n");
-    else if (game.over == 1 && cardinality(game.R, TOTALCELLS) < cardinality(game.B, TOTALCELLS))
+    else if (game->over == 1 && cardinality(game->R, TOTALCELLS) < cardinality(game->B, TOTALCELLS))
         printf("\nB wins!\n");
-    else if (game.over && cardinality(game.R, TOTALCELLS) == cardinality(game.B, TOTALCELLS))
+    else if (game->over && cardinality(game->R, TOTALCELLS) == cardinality(game->B, TOTALCELLS))
         printf("\ndraw\n");
 
 }
@@ -342,10 +421,14 @@ int main()
 {
 
   int nChoice;
+  int x, y;
 
-  gameState game = {.R = {-1}, .S = {-1}, .B = {-1}, .T = {-1}};
-  game.good, game.found, game.val = 0;
-  game.go, game.start = 1;
+  gameState game = {.R = {-1, -1, -1, -1, -1, -1, -1, -1, -1}, 
+                    .S = {-1, -1, -1, -1, -1, -1, -1, -1, -1}, 
+                    .B = {-1, -1, -1, -1, -1, -1, -1, -1, -1}, 
+                    .T = {-1, -1, -1, -1, -1, -1, -1, -1, -1}};
+  game.good = 0, game.found = 0, game.val = 0;
+  game.go = 1, game.start = 1;
 
   // Begin actual code executions below.
 
@@ -353,15 +436,14 @@ int main()
 
     printf("\n\n[ Welcome to the Game! ]\n\n");
 
-    
-
     do
     {
-
-
-
+        displayGrid(&game);
+        printf("Your turn, player %d! Type a pair of coordinates (eg., 1 1, starts from top left at 1 1)", 2 - game.go);
+        scanf("%d %d%*c", &x, &y);
+        NextPlayerMove(toSingle(x, y), &game);
         if (game.over == 1)
-            GameOver(game);
+            GameOver(&game);
 
     } while (game.over != 1);
 
