@@ -32,21 +32,6 @@ typedef struct game
 
 //Helper functions
 
-void displayGrid()
-{
-
-    char cOccupant[ROWS][COLUMNS];
-
-    printf("======================\n");
-    printf("|  %c  |  %c  |  %c  |\n", cOccupant[0][0], cOccupant[1][0], cOccupant[2][0]);
-    printf("======================\n");
-    printf("|  %c  |  %c  |  %c  |\n", cOccupant[0][1], cOccupant[1][1], cOccupant[2][1]);
-    printf("======================\n");
-    printf("|  %c  |  %c  |  %c  |\n", cOccupant[0][2], cOccupant[1][2], cOccupant[2][2]);
-    printf("======================\n");
-
-}
-
 //deletes a number from the set.
 void delete(int* arr, int target)
 {
@@ -60,6 +45,7 @@ void delete(int* arr, int target)
         else if(jump)
         {
             arr[i-jump] = arr[i];
+            arr[i] = -1;
         }
     }
 }
@@ -67,11 +53,13 @@ void delete(int* arr, int target)
 //adds an element to the set at the end (empty cells are marked with negative numbers)
 void insert(int* arr, int target)
 {
-    for(int i=0; i<TOTALCELLS; i++)
+    bool placed = 0;
+    for(int i=0; i<TOTALCELLS && !placed; i++)
     {
         if(arr[i] < 0)
         {
             arr[i] = target;
+            placed = 1;
         }
     }
 }
@@ -104,7 +92,52 @@ int inSet(int single, int size, int arr[])
     return found;
 }
 
+//Returns cardinality by counting nonnegative elements.
+int cardinality(int arr[], int n)
+{
+    int count = 0;
+    for(int i = 0; i < n; i++)
+    {
+        if(arr[i] >= 0)
+        {
+            count++;
+        }
+    }
 
+    return count;
+}
+
+void displayGrid(gameState game)
+{
+
+    char cOccupant[ROWS][COLUMNS];
+    for (int i = 1; i <= ROWS; i++)
+        for (int j = 1; j <= ROWS; j++)
+        {
+            int single = toSingle(i, j);
+            if(inSet(single, TOTALCELLS, game.R))
+            {
+                cOccupant[i][j] = 'R'; 
+            }
+            else if(inSet(single, TOTALCELLS, game.B))
+            {
+                cOccupant[i][j] = 'B';
+            }
+            else
+            {
+                cOccupant[i][j] = '-';
+            }
+        }
+
+    printf("======================\n");
+    printf("|  %c  |  %c  |  %c  |\n", cOccupant[0][0], cOccupant[1][0], cOccupant[2][0]);
+    printf("======================\n");
+    printf("|  %c  |  %c  |  %c  |\n", cOccupant[0][1], cOccupant[1][1], cOccupant[2][1]);
+    printf("======================\n");
+    printf("|  %c  |  %c  |  %c  |\n", cOccupant[0][2], cOccupant[1][2], cOccupant[2][2]);
+    printf("======================\n");
+
+}
 // MAIN FUNCTIONS---------------------------------------------------------------------------------------------------------------------------------
 
 //    (DEVNOTE - Lance: All functions are defaulted to void, please assume they are not yet fully interpreted - 03/04/26)
@@ -193,14 +226,27 @@ void Expand(int single, gameState game)
 
     if(game.go)
     {
-        Replace(u);
+        if(u != -1)
+        {
+           Replace(u); 
+        }
     }
     else
     {
-        Replace(d);
+        if(d != -1)
+        {
+           Replace(d); 
+        }
     }
-    Replace(k);
-    Replace(r);
+
+    if(k != -1)
+    {
+        Replace(k); 
+    }
+    if(r != -1)
+    {
+        Replace(r); 
+    }
 }
 
 /*
@@ -222,7 +268,7 @@ void Update(int single, gameState game)
     if(!game.good && inSet(single, TOTALCELLS, game.S) && !inSet(single, TOTALCELLS, game.T))
     {
         insert(game.T, single);
-        Expand(game.T, game);
+        Expand(single, game);
     }
 }
 
@@ -258,7 +304,7 @@ void NextPlayerMove(int single, gameState game)
     game.good = 1;
   }
 
-  if (game.start && R[] == 1 && B[] == 1)
+  if (game.start && cardinality(game.R, TOTALCELLS) == 1 && cardinality(game.B, TOTALCELLS) == 1)
     game.start = 0;
 
   if (!game.over && game.good == 0)
@@ -281,15 +327,14 @@ void GameOver(gameState game)
   // (over ∧ |R| < |B|) → result = “B wins”
   // (over ∧ |R| = |B|) → result = “draw”
 
-    if (game.over == 1 && game.R[] > game.B[])
+    if (game.over == 1 && cardinality(game.R, TOTALCELLS) > cardinality(game.B, TOTALCELLS))
         printf("\nR wins!\n");
-    else if (game.over == 1 && game.R[] < game.B[])
+    else if (game.over == 1 && cardinality(game.R, TOTALCELLS) < cardinality(game.B, TOTALCELLS))
         printf("\nB wins!\n");
-    else if (game.over && game.R[] == game.B[])
+    else if (game.over && cardinality(game.R, TOTALCELLS) == cardinality(game.B, TOTALCELLS))
         printf("\ndraw\n");
 
 }
-
 
 // MAIN--------------------------------------------------------------------------------------------------------------------------------------
 
