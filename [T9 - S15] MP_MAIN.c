@@ -381,7 +381,6 @@ void Expand(int single, gameState* game)
     {
         if(u != -1)
         {
-           printf("Expanding left: %d and %d from %d\n", a, b, single);
            Replace(u, game); 
         }
     }
@@ -389,19 +388,16 @@ void Expand(int single, gameState* game)
     {
         if(d != -1)
         {
-           printf("Expanding right: %d and %d from %d\n", a, b, single);
            Replace(d, game); 
         }
     }
 
     if(k != -1)
     {
-        printf("Expanding high: %d and %d from %d\n", a, b, single);
         Replace(k, game); 
     }
     if(r != -1)
     {
-        printf("Expanding low: %d and %d from %d\n", a, b, single);
         Replace(r, game); 
     }
 }

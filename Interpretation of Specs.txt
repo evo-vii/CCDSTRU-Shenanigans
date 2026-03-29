@@ -1,6 +1,6 @@
 Interpretation of MP Specs
 
-Sample from Seb:
+Sample from Seb (as of February):
 
 Played on 3x3 grid (Set M, C defines the sides). 
 
